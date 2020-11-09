@@ -10,9 +10,12 @@ const dotenv = require("dotenv");
 const passport = require("passport");
 const expressValidator = require("express-validator");
 // const DB = require('./config/database');
-const api_routes = require("./routes/api")(express);
 const morgan = require("morgan");
-const httpError = require("http-errors");
+const elasticSearch = require("elasticsearch");
+const elasticClient = elasticSearch.Client({
+  host: "178.238.236.3:9200",
+});
+const api_routes = require("./routes/api")(express, elasticClient);
 
 /**
  * Middlewares
@@ -20,7 +23,6 @@ const httpError = require("http-errors");
 const NotFoundMiddleware = require("./Middlewares/NotFoundlMiddleware");
 const ServerErrorMiddleware = require("./Middlewares/ServerErrorMiddleware");
 const EnablingCorsMiddleware = require("./Middlewares/EnablingCorsMiddleware");
-const jwtMiddleware = require("./Middlewares/JwtMiddleware");
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
@@ -80,6 +82,24 @@ app.get("/privatRessource", (req, res) => {
 });
 
 /**
+ * Check Elasticsearch connection
+ */
+elasticClient.ping(
+  {
+    requestTimeout: 30000,
+  },
+  function (error) {
+    if (error) {
+      console.trace("Error:", error);
+    } else {
+      console.log("Connected to ElasticSearch Server");
+    }
+    // on finish
+    // elasticClient.close();
+  }
+);
+
+/**
  * Switch between dev/prod
  * [ERROR HANDLER]
  */
@@ -114,18 +134,6 @@ const server = app.listen(app.get("port"), () => {
     app.get("env")
   );
   console.log("  Press CTRL-C to stop\n");
-});
-
-const io = require("socket.io")(server);
-io.on("connection", (socket) => {
-  console.log("a user connected");
-  socket.on("disconnect", (msg) => {
-    console.log("user disconnected");
-  });
-
-  // setInterval(function () {
-  //   socket.emit("news_by_server", "Cow goes moo");
-  // }, 1000);
 });
 
 module.exports = app;

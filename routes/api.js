@@ -1,7 +1,8 @@
-const TodoController = require("../Controllers/TodoController");
-
-module.exports = function (express) {
+module.exports = function (express, elasticClient) {
   var router = express.Router();
+  const TodoController = require("../Controllers/TodoController")(
+    elasticClient
+  );
 
   /*
     |--------------------------------------------------------------------------
@@ -10,7 +11,7 @@ module.exports = function (express) {
     */
   router.get("/todos", TodoController.fetch);
   router.get("/todos/:id", TodoController.single);
-  router.post("/todos", TodoController.create);
+  router.post("/todos", TodoController.index);
   router.put("/todos/:id", TodoController.update);
   router.delete("/todos/:id", TodoController.delete);
 
