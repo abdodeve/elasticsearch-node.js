@@ -14,6 +14,7 @@ module.exports = function (express, elasticClient) {
   router.post("/todos", TodoController.index);
   router.put("/todos/:id", TodoController.update);
   router.delete("/todos/:id", TodoController.delete);
+  router.get("/todos/search/:keyword", TodoController.search);
 
   return router;
 };

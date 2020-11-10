@@ -92,5 +92,30 @@ module.exports = function (elasticClient) {
         res.json({ error: true, details: error });
       }
     },
+    /**
+     * DELETE /api/todos/:id
+     * Delete todo
+     */
+    search: async function (req, res) {
+      try {
+        const result = await elasticClient.search({
+          index: "kibana_sample_data_ecommerce",
+          body: {
+            query: {
+              match: {
+                customer_full_name: {
+                  query: req.params.keyword,
+                  fuzziness: "2",
+                },
+              },
+            },
+          },
+        });
+        res.json({ success: true, todos: result });
+      } catch (error) {
+        console.error(error);
+        res.json({ error: true, details: error });
+      }
+    },
   };
 };
